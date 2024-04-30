@@ -5,20 +5,20 @@ require_once "dao/UserDaoBd.php";
 class Auth {
     private $pdo;
     private $base;
+    private $dao;
 
     public function __construct(PDO $pdo, $base) {
         $this->pdo = $pdo;
         $this->base = $base;
+        $this->dao = new UserDaoBd($this->pdo);
     }
 
     public function checkToken() {
 
         if(!empty($_SESSION['token'])) {
             $token = $_SESSION['token'];
-       // if(!empty($token)) {
-
-            $userDao = new UserDaoBd($this->pdo);
-            $user = $userDao->findByToken($token);
+                   
+            $user = $this->dao->findByToken($token);
 
             if($user) { // Verificar se o o token do usuário foi encontrado
                 return $user;
@@ -35,16 +35,15 @@ class Auth {
 
 
     public function validatelogin($email, $password) {
-        $userDao = new UserDaoBd($this->pdo);
-        
-        $user = $userDao->findByEmail($email);
+                
+        $user = $this->dao->findByEmail($email);
         if($user) { // Verifica se encontrou usuário com email
             if(password_verify($password, $user->password)) { // Verifica se identificou a senha
                 $token = md5(time().rand(0, 99999)); // Cria o token
 
                 $_SESSION['token'] = $token; // Atribui a sessão
                 $user->token = $token; // Atribuiu o novo token ao usuário
-                $userDao->update($user); // Atualiza na base
+                $this->dao->update($user); // Atualiza na base
 
                 return true;
 
@@ -54,15 +53,15 @@ class Auth {
         return false;
     }
 
+    
     public function emailExists($email) {
-        $userDao = new UserDaoBd($this->pdo);
-        return $userDao->findByEmail($email) ? true : false;
+        
+        return $this->dao->findByEmail($email) ? true : false;
         
     }
 
     public function registerUser($name, $email, $password, $birthdate) {
-        $userDao = new UserDaoBd($this->pdo);
-
+       
         // Criando hash da senha
         $hash = password_hash($password, PASSWORD_DEFAULT);
 
@@ -76,7 +75,7 @@ class Auth {
         $newUser->birthdate = $birthdate;
         $newUser->token = $token; // Para logar depois do cadastro
        
-        $userDao->insert($newUser);
+        $this->dao->insert($newUser);
 
         $_SESSION['token'] = $token;
     }

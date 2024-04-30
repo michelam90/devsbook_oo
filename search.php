@@ -1,22 +1,23 @@
 <?php
 require_once 'config.php';
 require_once 'models/Auth.php';
-require_once 'dao/PostDaoBd.php';
+require_once 'dao/UserDaoBd.php';
 
 // Verificando se o usuários está logado
 $auth = new Auth($pdo, $base);
 $userInfo = $auth->checkToken();
+$activeMenu = 'search';
 
-$activeMenu = 'Home';
+$userDao = new UserDaoBd($pdo);
 
-$postDao = new PostDaoBd($pdo);
-$feed = $postDao->getHomeFeed($userInfo->id);
+$searchTerm = filter_input(INPUT_GET, 's');
 
-/*
-echo "<pre>";
-print_r($feed);
-exit;
-*/
+if(empty($searchTerm)) {
+    header("Location: index.php");
+    exit;
+}
+
+$userList = $userDao->findByName($searchTerm);
 
 require 'partials/header.php';
 require 'partials/menu.php';
@@ -26,13 +27,26 @@ require 'partials/menu.php';
 <?php //print_r($userInfo); ?>
     <div class="row">
         <div class="column pr-5">
-            <?php require 'partials/feed-editor.php'; ?>
+            
+            <h2>Pesquisa por: <?=$searchTerm;?></h2>
+            
+            <?php //print_r($userList); ?>
 
-            <?php 
-                foreach($feed as $item) {
-                    require 'partials/feed-item.php'; 
-                }
-            ?>
+            <div class="full-friend-list" >
+
+                <?php foreach($userList as $item): ?>
+                    <div class="friend-icon">
+                        <a href="<?=$base;?>/perfil.php?id=<?=$item->id;?>">
+                            <div class="friend-icon-avatar">
+                                <img src="<?=$base;?>/media/avatars/<?=$item->avatar;?>" />
+                            </div>
+                            <div class="friend-icon-name">
+                                <?=$item->name;?>
+                            </div>
+                        </a>
+                    </div>
+                <?php endforeach; ?>
+            </div>
         </div>
         
         <div class="column side pl-5">

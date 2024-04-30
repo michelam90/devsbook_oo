@@ -1,15 +1,17 @@
 <?php 
 require_once "models/User.php";
+require_once "UserRelationDaoBd.php";
+require_once "dao/PostDaoBd.php";
 
 class UserDaoBd implements UserDAO {
     private $pdo;
 
-    public function __construct(PDO $pdo) {
-        $this->pdo = $pdo;
+    public function __construct(PDO $driver) {
+        $this->pdo = $driver;
     }
 
     // Criando função auxiliar que recebe um array e monta um objeto
-    private function generateUser($array) {
+    private function generateUser($array, $full = false) {
         $u = new User();
         $u->id = $array['id'] ?? 0;
         $u->email = $array['email'] ?? '';
@@ -21,6 +23,29 @@ class UserDaoBd implements UserDAO {
         $u->avatar = $array['avatar'] ?? '';
         $u->cover = $array['cover'] ?? '';
         $u->token = $array['token'] ?? '';
+
+        if($full) { // Só será usado quando o paramentro $full form verdadeiro
+            $urDaoBd = new UserRelationDaoBd($this->pdo);
+            $postDaoBd = new PostDaoBd($this->pdo);
+
+            // Followers = Quem segue o usuário logado
+            $u->followers = $urDaoBd->getFollowers($u->id); // O próprio ID que é passado nessa função para o Objeto 
+            // Pegando dados dos usuários pelo ID reutilizando a função findByID
+            foreach($u->followers as $key => $follower_id) {
+                $newUser = $this->findById($follower_id);
+                $u->followers[$key] = $newUser;
+            }
+
+            // Following = Quem segue o usuário logado
+            $u->following = $urDaoBd->getFollowing($u->id);
+            foreach($u->following as $key => $following_id) {
+                $newUser = $this->findById($following_id);
+                $u->following[$key] = $newUser;
+            }
+            // Fotos
+            $u->photos = $postDaoBd->getPhotosFrom($u->id);
+
+        }
 
         return $u;
     }
@@ -59,6 +84,47 @@ class UserDaoBd implements UserDAO {
             if($sql->rowCount() > 0) {
                 $data = $sql->fetch();
                 $user = $this->generateUser($data);
+                return $user;
+            }
+        }
+
+        return false;
+    }
+
+    // Buscando pelo nome
+    public function findByName($name) {
+
+        $array = [];
+
+        if(!empty($name)) {
+            $sql = "SELECT * FROM users WHERE name LIKE :name";
+            $sql = $this->pdo->prepare($sql);
+            $sql->bindValue(':name', '%'.$name.'%');
+            $sql->execute();
+
+            if($sql->rowCount() > 0) {
+                $data = $sql->fetchAll(PDO::FETCH_ASSOC);
+                
+                foreach($data as $item) {
+                    $array[] = $this->generateUser($item);
+                }
+            }
+        }
+
+        return $array;
+    }
+
+    public function findById($id, $full = false) {
+
+        if(!empty($id)) {
+            $sql = "SELECT * FROM users WHERE id = :id";
+            $sql = $this->pdo->prepare($sql);
+            $sql->bindValue(":id", $id);
+            $sql->execute();
+
+            if($sql->rowCount() > 0) {
+                $data = $sql->fetch();
+                $user = $this->generateUser($data, $full);
                 return $user;
             }
         }
