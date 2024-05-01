@@ -76,7 +76,7 @@ if($name && $email) {
     // print_r($_FILES);
    
 
-    // Recebendo imagem do avatar
+    // AVATAR -> Recebendo imagem do avatar
     if(isset($_FILES['avatar']) && !empty($_FILES['avatar']['tmp_name'])) {
         $newAvatar = $_FILES['avatar'];
        
@@ -134,6 +134,68 @@ if($name && $email) {
             imagejpeg($finalImage, './media/avatars/'.$avatarName, 100); // 100 de qualidade
 
             $userInfo->avatar = $avatarName;
+        }
+    }
+
+
+    // COVER -> Recebendo imagem do cover
+    if(isset($_FILES['cover']) && !empty($_FILES['cover']['tmp_name'])) {
+        $newCover = $_FILES['cover'];
+       
+        if(in_array($newCover['type'], ['image/jpeg', 'image/jpg', 'image/png'])) {
+
+            // Calculando dimensõe da imagem
+            $coverWidth = 850;
+            $coverHeight = 313;
+
+            // Calculando a proporção
+            list($widthOrig, $heightOrig) = getimagesize($newCover['tmp_name']);
+            $ratio = $widthOrig / $heightOrig;
+
+            $newWidth = $coverWidth;
+            $newHeight = $newWidth / $ratio;
+
+            // Verificando se a imagem está aproximadamente do tamanho pre definido (200X200) sem perder qualidade
+            if($newHeight < $coverHeight) {
+                $newHeight = $coverHeight;
+                $newWidth = $newHeight * $ratio;
+            }
+
+            //echo $newWidth.' x '.$newHeight;
+
+            // Definindo valor de corte para ficar na proporção que precisamos
+            $x = $coverWidth - $newWidth;
+            $y = $coverHeight - $newHeight;
+            $x = $x<0 ? $x/2 : $x;
+            $y = $y<0 ? $y/2 : $y;
+
+            //echo $x . ' X '. $y;
+
+            $finalImage = imagecreatetruecolor($coverWidth, $coverHeight);
+
+            switch($newCover['type']) {
+                case 'image/jpeg':
+                case 'image/jpg':
+                    $image = imagecreatefromjpeg($newCover['tmp_name']);
+                break;
+                case 'image/png':
+                    $image = imagecreatefrompng($newCover['tmp_name']);
+                break;
+            }
+
+            imagecopyresampled(
+                $finalImage, $image,
+                $x, $y, 0, 0,
+                $newWidth, $newHeight, $widthOrig, $heightOrig
+            );
+
+            // Definindo nome da imageme e salvando ela 
+            $coverName = md5(time().rand(0,9999)).'jpg';
+
+            // Gerando imagem e salvando
+            imagejpeg($finalImage, './media/covers/'.$coverName, 100); // 100 de qualidade
+
+            $userInfo->cover = $coverName;
         }
     }
     
