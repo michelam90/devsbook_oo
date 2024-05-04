@@ -120,7 +120,7 @@ require 'partials/menu.php';
                     <div class="full-friend-list">
 
 
-                        <?php foreach($user->followers as $item): ?>
+                        <?php foreach($user->following as $item): ?>
                             <div class="friend-icon">
                                 <a href="<?=$base;?>/perfil.php?id=<?=$item->id;?>">
                                     <div class="friend-icon-avatar">

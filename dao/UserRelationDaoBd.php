@@ -9,8 +9,23 @@ class UserRelationDaoBd implements UserRelationDAO {
         $this->pdo = $driver;
     }
 
+    // Inserindo seguido no bando (començando a seguir)
     public function insert(UserRelation $u) {
+        $sql = "INSERT INTO userrelations (user_from, user_to) VALUES (:user_from, :user_to)";
+        $sql = $this->pdo->prepare($sql);
+        $sql->bindValue(':user_from', $u->user_from);
+        $sql->bindValue(':user_to', $u->user_to);
+        $sql->execute();
 
+    }
+
+    // Removendo seguidor do banco (Deixando de seguir)
+    public function delete(UserRelation $u) {
+        $sql = "DELETE FROM userrelations WHERE user_from = :user_from AND user_to = :user_to";
+        $sql = $this->pdo->prepare($sql);
+        $sql->bindValue(':user_from', $u->user_from);
+        $sql->bindValue(':user_to', $u->user_to);
+        $sql->execute();
     }
 
     // Usuários que o ID está seguindo
@@ -49,4 +64,21 @@ class UserRelationDaoBd implements UserRelationDAO {
 
         return $users;
     }
+
+    // Verificando se o usuário logado segue o perfil de outro usuário
+    public function isFollowing($id1, $id2) {
+
+        $sql = "SELECT * FROM userrelations WHERE user_from = :user_from AND user_to = :user_to";
+        $sql = $this->pdo->prepare($sql);
+        $sql->bindValue(':user_from', $id1);
+        $sql->bindValue(':user_to', $id2);
+        $sql->execute();
+
+        if($sql->rowCount() > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 }

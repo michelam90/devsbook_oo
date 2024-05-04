@@ -2,6 +2,7 @@
 require_once 'config.php';
 require_once 'models/Auth.php';
 require_once 'dao/PostDaoBd.php';
+require_once 'dao/UserRelationDaoBd.php';
 
 // Verificando se o usuários está logado
 $auth = new Auth($pdo, $base);
@@ -22,6 +23,7 @@ if($id !== $userInfo->id) {
 
 $postDao = new PostDaoBd($pdo);
 $userDao = new UserDaoBd($pdo);
+$userRelationDao = new UserRelationDaoBd($pdo);
 
 
 // Pegar informações do usuário
@@ -41,7 +43,7 @@ $feed = $postDao->getUserFeed($id);
 
 
 // Verificar se eu SIGO o usuário
-$isFollowing = false;
+$isFollowing = $userRelationDao->isFollowing($userInfo->id, $id);
 
 require 'partials/header.php';
 require 'partials/menu.php';
@@ -65,7 +67,7 @@ require 'partials/menu.php';
                 <div class="profile-info-data row">
                     <?php if($id != $userInfo->id): ?>
                         <div class="profile-info-item m-width-20">
-                            <a href="" class="button">Seguir</a>
+                            <a href="follow_action.php?id=<?=$id;?>" class="button"><?=(!$isFollowing) ? 'Seguir' : 'Deixar de seguir'; ?></a>
                         </div>
                     <?php endif; ?>
                     <div class="profile-info-item m-width-20">
