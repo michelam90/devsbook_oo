@@ -3,6 +3,7 @@ require_once 'models/Post.php';
 require_once 'dao/UserRelationDaoBd.php';
 require_once 'dao/UserDaoBd.php';
 require_once 'dao/PostLikeDaoBd.php';
+require_once 'dao/PostCommentDaoBd.php';
 
 class PostDaoBd implements PostDAO {
     private $pdo;
@@ -39,9 +40,7 @@ class PostDaoBd implements PostDAO {
             $data = $sql->fetchAll(PDO::FETCH_ASSOC);
             
             // Transformar resultado em objetos
-            $post_list = $this->postListToObject($data, $id_user);
-
-            
+            $post_list = $this->postListToObject($data, $id_user);            
         }
 
         return $post_list;
@@ -98,6 +97,7 @@ class PostDaoBd implements PostDAO {
         $posts = [];
         $userDao = new UserDaoBd($this->pdo); // Para pegar os dados do usuário que fez o post
         $postLikeDao = new PostLikeDaoBd($this->pdo); // Para pegar os dados de likes no post
+        $postCommentDao = new PostCommentDaoBd($this->pdo); // Para pegar os dados de comentários
         
 
         foreach($post_list as $post_item) {
@@ -122,7 +122,7 @@ class PostDaoBd implements PostDAO {
             $newPost->liked = $postLikeDao->isLiked($newPost->id, $id_user); // Marcar se o usuário logado curtiu o post
 
             // Pegar informações de comentários
-            $newPost->comments = [];
+            $newPost->comments = $postCommentDao->getComments($newPost->id);
 
             $posts[] = $newPost;
         }

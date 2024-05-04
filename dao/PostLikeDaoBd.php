@@ -17,6 +17,7 @@ class PostLikeDaoBd implements PostLikeDAO {
 
         $data = $sql->fetch();
         return $data['c'];
+        
     }
     
     // Verificando se o usuário logado curtiu este post

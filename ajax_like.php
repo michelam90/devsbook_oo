@@ -8,8 +8,7 @@ $userInfo = $auth->checkToken();
 
 $id = filter_input(INPUT_GET, 'id');
 
-if(!empty($id)) {
-    echo 'oi!';
+if(!empty($id)) {   
     $postLikeDao = new PostLikeDaoBd($pdo);
     $postLikeDao->likeToggle($id, $userInfo->id);    
 }

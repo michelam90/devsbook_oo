@@ -40,9 +40,8 @@ $user->ageYears = $dateFrom->diff($dateTo)->y;
 $feed = $postDao->getUserFeed($id);
 
 
-/*
-$feed = $postDao->getHomeFeed($userInfo->id);
-*/
+// Verificar se eu SIGO o usuário
+$isFollowing = false;
 
 require 'partials/header.php';
 require 'partials/menu.php';
@@ -64,6 +63,11 @@ require 'partials/menu.php';
                 <?php } ?>
                 </div>
                 <div class="profile-info-data row">
+                    <?php if($id != $userInfo->id): ?>
+                        <div class="profile-info-item m-width-20">
+                            <a href="" class="button">Seguir</a>
+                        </div>
+                    <?php endif; ?>
                     <div class="profile-info-item m-width-20">
                         <div class="profile-info-item-n"><?=count($user->followers);?></div>
                         <div class="profile-info-item-s">Seguidores</div>

@@ -36,6 +36,20 @@ switch($item->type) {
             <div class="msg-btn"><?=count($item->comments);?></div>
         </div>
         <div class="feed-item-comments">
+
+            <div class="feed-item-comments-area">
+                <?php foreach($item->comments as $comments) : ?>
+                    <div class="fic-item row m-height-10 m-width-20">
+                        <div class="fic-item-photo">
+                            <a href="<?=$base;?>/perfil.php?id=<?=$comments->user->id;?>"><img src="<?=$base;?>/media/avatars/<?=$comments->user->avatar;?>" /></a>
+                        </div>
+                        <div class="fic-item-info">
+                            <a href="<?=$base;?>/perfil.php?id=<?=$comments->user->id;?>"><?=$comments->user->name;?></a>
+                            <?=$comments->body;?>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
                               
 
             <div class="fic-answer row m-height-10 m-width-20">
