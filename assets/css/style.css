@@ -236,9 +236,21 @@ header .head-side {
     cursor: pointer;
     margin-right:5px;
 }
-.feed-new-send img {
+
+.feed-new-photo {
+    cursor: pointer;
+    margin-right:5px;
+}
+
+.feed-new-send img, .feed-new-photo img {
     width:25px;
     height:25px;
+}
+
+.feed-new-file {
+    position: absolute;
+    left: -500px;
+    top: -500px;
 }
 
 .banners .box-body {
@@ -353,7 +365,13 @@ header .head-side {
 
 .user-photo-item {
     margin-right:10px;
+    max-width: 25%;
 }
+
+.full-user-photos, .user-photo-item {
+    max-width: 100%;
+}
+
 .user-photo-item:last-child {
     margin-right:0;
 }
