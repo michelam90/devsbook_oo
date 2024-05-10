@@ -12,6 +12,7 @@ class PostDaoBd implements PostDAO {
         $this->pdo = $driver;
     }
 
+    // Inserindo post
     public function insert(Post $p) {
 
         $sql = "INSERT INTO posts (id_user, type, created_at, body)
@@ -21,6 +22,17 @@ class PostDaoBd implements PostDAO {
         $sql->bindValue(':type', $p->type);
         $sql->bindValue(':created_at', $p->created_at);
         $sql->bindValue(':body', $p->body);
+        $sql->execute();
+
+    }
+
+    // Deletando post
+    public function delete($id, $id_user) {
+
+        $sql = "DELETE FROM posts WHERE id = :id AND id_user = :id_user";
+        $sql = $this->pdo->prepare($sql);
+        $sql->bindValue(':id', $id);
+        $sql->bindValue(':id_user', $id_user);
         $sql->execute();
 
     }

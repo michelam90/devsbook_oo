@@ -1,5 +1,27 @@
 <script>
 window.onload = function() {
+
+    // Código para exibir botão de excluir post
+    function closeFeedWindow() {
+        document.querySelectorAll('.feed-item-more-window').forEach(item=>{
+            item.style.display = 'none';
+        });
+        
+        document.removeEventListener('click', closeFeedWindow);
+    }
+
+    document.querySelectorAll('.feed-item-head-btn').forEach(item=>{
+        item.addEventListener('click', ()=>{
+            closeFeedWindow();
+
+            item.querySelector('.feed-item-more-window').style.display = 'block';
+            setTimeout(()=>{
+                document.addEventListener('click', closeFeedWindow);
+            }, 500);
+        });
+    });
+
+    
     // Código para Likes
     document.querySelectorAll('.like-btn').forEach(item=>{
         item.addEventListener('click', ()=>{
