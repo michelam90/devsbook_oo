@@ -38,9 +38,19 @@ $dateFrom = new DateTime($user->birthdate);
 $dateTo = new DateTime('today');
 $user->ageYears = $dateFrom->diff($dateTo)->y;
 
-// Pegar feed do usuário
-$feed = $postDao->getUserFeed($id);
 
+// Pegando informações para fazer a paginação do feed
+$page = intval(filter_input(INPUT_GET, 'p'));
+
+if($page < 1) {
+    $page = 1;
+}
+
+// Pegando informações para montar o feed
+$info = $postDao->getUserFeed($id, $page);
+$feed = $info['feed'];
+$pages = $info['pages'];
+$correntPage = $info['correntPage'];
 
 // Verificar se eu SIGO o usuário
 $isFollowing = $userRelationDao->isFollowing($userInfo->id, $id);
@@ -192,9 +202,18 @@ require 'partials/menu.php';
         <?php endif; ?>
 
         <?php if(count($feed) > 0): ?>
+
             <?php foreach($feed as $item): ?>
                 <?php require 'partials/feed-item.php';?>
             <?php endforeach; ?>
+
+            <div class="feed-pagination">
+                <?php for($i=0; $i < $pages; $i++): ?>
+                        <a class="<?=($i+1==$correntPage) ? 'active' : '';?>" href="<?=$base;?>/perfil.php?id=<?=$id;?>&p=<?=$i+1;?>"> <?=$i+1;?> </a>
+                
+                <?php endfor; ?>
+            </div>
+
         <?php else: ?>
             Não há postagens desse usuário.
         <?php endif; ?>

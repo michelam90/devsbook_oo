@@ -38,12 +38,16 @@ class PostDaoBd implements PostDAO {
     }
 
     // Para usar na time line do perfil do usuário
-    public function getUserFeed($id_user) {
+    public function getUserFeed($id_user, $page = 1) {
 
-        $post_list = [];
+        $array = ['feed'=>[]];
+
+        // Trabalhando a paginação
+        $perPage = 3;
+        $offset = ($page -1) * $perPage;
         
-        // Pegar os posts ordenados por data 
-        $sql = "SELECT * FROM posts WHERE id_user = :id_user ORDER BY created_at DESC";
+        // 1. Pegar os posts ordenados por data 
+        $sql = "SELECT * FROM posts WHERE id_user = :id_user ORDER BY created_at DESC LIMIT $offset , $perPage";
         $sql = $this->pdo->prepare($sql);
         $sql->bindValue(':id_user', $id_user);
         $sql->execute();
@@ -51,37 +55,66 @@ class PostDaoBd implements PostDAO {
         if($sql->rowCount() > 0) {
             $data = $sql->fetchAll(PDO::FETCH_ASSOC);
             
-            // Transformar resultado em objetos
-            $post_list = $this->postListToObject($data, $id_user);            
+            // 2. Transformar resultado em objetos e pegar os posts
+            $array['feed'] = $this->postListToObject($data, $id_user);            
         }
 
-        return $post_list;
+        // 3. Pegar o total de posts
+        $sql = "SELECT COUNT(*) AS c FROM posts WHERE id_user = :id_user";
+        $sql = $this->pdo->prepare($sql);
+        $sql->bindValue(':id_user', $id_user);
+        $sql->execute();
+        $totalData = $sql->fetch();
+        $total = $totalData['c'];
+
+        // Contando quantidade páginas (Conforme núemro de post dividido pela quantidade exibida por pagina)
+        $array['pages'] = ceil($total / $perPage);
+
+        // Pegando a pagina atual para exibir a pagina que está ativa no momento na paginação
+        $array['correntPage'] = $page;
+
+        return $array;
     }
 
     // Para usar na time line principal
-    public function getHomeFeed($id_user) {
+    public function getHomeFeed($id_user, $page = 1) {
 
-        $post_list = [];
+        $array = [];
 
-        // Lista dos usuários que eu sigo
+        // Trabalhando a paginação
+        $perPage = 3;    
+        $offset = ($page -1) * $perPage;
+
+        // 1. Lista dos usuários que eu sigo
         $urDao = new UserRelationDaoBd($this->pdo);
         $userList = $urDao->getFollowing($id_user);
         $userList[] = $id_user;
 
-        // Pegar os posts ordenados por data 
-        $sql = "SELECT * FROM posts WHERE id_user IN (".implode(',', $userList).") ORDER BY created_at DESC";
+        // 2. Pegar os posts ordenados por data 
+        $sql = "SELECT * FROM posts WHERE id_user IN (".implode(',', $userList).") 
+        ORDER BY created_at DESC LIMIT $offset , $perPage";
         $sql = $this->pdo->query($sql);
 
         if($sql->rowCount() > 0) {
             $data = $sql->fetchAll(PDO::FETCH_ASSOC);
             
-            // Transformar resultado em objetos
-            $post_list = $this->postListToObject($data, $id_user);
-
-            
+            // 3. Transformar resultado em objetos e pegando os posts
+            $array['feed'] = $this->postListToObject($data, $id_user);            
         }
 
-        return $post_list;
+        // 4. Pegar o total de posts
+        $sql = "SELECT COUNT(*) AS c FROM posts WHERE id_user IN (".implode(',', $userList).")";
+        $sql = $this->pdo->query($sql);
+        $totalData = $sql->fetch();
+        $total = $totalData['c'];
+
+        // Contando quantidade páginas (Conforme núemro de post dividido pela quantidade exibida por pagina)
+        $array['pages'] = ceil($total / $perPage);
+
+        // Pegando a pagina atual para exibir a pagina que está ativa no momento na paginação
+        $array['correntPage'] = $page;
+
+        return $array;
     }
 
 

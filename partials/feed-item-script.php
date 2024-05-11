@@ -1,5 +1,5 @@
 <script>
-window.onload = function() {
+window.addEventListener('load', function() { 
 
     // Código para exibir botão de excluir post
     function closeFeedWindow() {
@@ -76,5 +76,8 @@ window.onload = function() {
             }
         });
     });
-};
+
+});
+
+
 </script>

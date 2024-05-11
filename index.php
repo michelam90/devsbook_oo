@@ -9,8 +9,19 @@ $userInfo = $auth->checkToken();
 
 $activeMenu = 'Home';
 
+// Pegando informações para fazer a paginação do feed
+$page = intval(filter_input(INPUT_GET, 'p'));
+
+if($page < 1) {
+    $page = 1;
+}
+
+// Pegando informações para montar o feed
 $postDao = new PostDaoBd($pdo);
-$feed = $postDao->getHomeFeed($userInfo->id);
+$info = $postDao->getHomeFeed($userInfo->id, $page);
+$feed = $info['feed'];
+$pages = $info['pages'];
+$correntPage = $info['correntPage'];
 
 /*
 echo "<pre>";
@@ -28,12 +39,22 @@ require 'partials/menu.php';
         <div class="column pr-5">
             <?php require 'partials/feed-editor.php'; ?>
 
-            <?php 
+            <?php // Listando o feed
                 foreach($feed as $item) {
                     require 'partials/feed-item.php'; 
                 }
             ?>
+
+            <div class="feed-pagination">
+                <?php for($i=0; $i < $pages; $i++): ?>
+                        <a class="<?=($i+1==$correntPage) ? 'active' : '';?>" href="<?=$base;?>?p=<?=$i+1;?>"> <?=$i+1;?> </a>
+                
+                <?php endfor; ?>
+            </div>
+            
         </div>
+
+        
         
         <div class="column side pl-5">
             <div class="box banners">
