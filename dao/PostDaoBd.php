@@ -79,7 +79,7 @@ class PostDaoBd implements PostDAO {
     // Para usar na time line principal
     public function getHomeFeed($id_user, $page = 1) {
 
-        $array = [];
+        $array = ['feed'=>[]];
 
         // Trabalhando a paginação
         $perPage = 3;    
