@@ -1,6 +1,6 @@
 # DEVSBOOK
 
-Esse projeto via criar uma aplicação web similar ao Facebook, com o front-end em HTML, CSS e JS.
+Esse projeto visa criar uma aplicação web similar ao Facebook, com o front-end em HTML, CSS e JS.
 
 Mas o principal elemento do projetp é o desenvolvimento em PHP orientado a objetos para o back-end.
 
